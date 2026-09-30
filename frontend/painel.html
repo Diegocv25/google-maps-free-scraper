@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Google Maps Scraper · Painel</title>
+  <link rel="icon" type="image/png" href="/app/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="/app/painel.css">
+</head>
+<body>
+  <aside class="sidebar liquid">
+    <div class="brand">
+      <img class="brand-mark" src="/app/img/logo.png" alt="" width="34" height="34">
+      <div>
+        <div class="brand-name">Google Maps Scraper</div>
+        <div class="brand-sub">Painel de coleta</div>
+      </div>
+    </div>
+    <div class="mode-switch" role="tablist" aria-label="Modo de visualização">
+      <a href="/" id="to-map" role="tab" aria-selected="false" title="Ver tudo sobre o mapa">Mapa</a>
+      <a href="/painel" role="tab" aria-selected="true" class="on">Painel</a>
+    </div>
+    <nav class="nav">
+      <a href="#sec-overview" class="nav-item active"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/></svg>Visão geral</a>
+      <a href="#sec-new" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>Nova busca</a>
+      <a href="#sec-jobs" class="nav-item"><svg viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.8" cy="6.5" r=".9"/><circle cx="4.8" cy="12" r=".9"/><circle cx="4.8" cy="17.5" r=".9"/></svg>Suas buscas <span id="nav-badge" class="nav-badge" hidden></span></a>
+      <a href="#results" class="nav-item" id="nav-results" hidden><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M9.5 9.5v10"/></svg>Resultados</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="credits compact">
+        <p>Motor: <a href="https://github.com/gosom/google-maps-scraper" target="_blank" rel="noopener"><b>google-maps-scraper</b></a> de Georgios Komninos (@gosom) · MIT</p>
+        <div class="credits-actions">
+          <a class="credit-btn" href="https://github.com/gosom/google-maps-scraper" target="_blank" rel="noopener" title="Dar estrela no GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>Estrela</a>
+          <a class="credit-btn" href="https://github.com/sponsors/gosom" target="_blank" rel="noopener" title="Apoiar o autor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 21.35-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Apoiar</a>
+        </div>
+      </div>
+      <span id="health" class="health"><i></i><span>verificando…</span></span>
+      <a class="link-muted" href="/classic" title="Interface original do scraper">interface antiga</a>
+    </div>
+  </aside>
+
+  <main class="page">
+    <div class="page-head" id="sec-overview">
+      <h1>Visão geral</h1>
+      <p>Crie buscas de empresas no Google Maps, acompanhe o andamento e baixe as listas.</p>
+    </div>
+
+    <section class="kpis" aria-label="Resumo">
+      <div class="kpi blue"><span class="kpi-label"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></svg>Buscas feitas</span><span class="kpi-value" id="kpi-jobs">–</span><span class="kpi-hint" id="kpi-jobs-hint">&nbsp;</span></div>
+      <div class="kpi red"><span class="kpi-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.4"/></svg>Empresas coletadas</span><span class="kpi-value" id="kpi-places">–</span><span class="kpi-hint">somando todas as buscas</span></div>
+      <div class="kpi green"><span class="kpi-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 4.5h3l1.6 4-2 1.3a10.5 10.5 0 0 0 6.4 6.4l1.3-2 4 1.6v3a1.7 1.7 0 0 1-1.8 1.7A15.5 15.5 0 0 1 3.5 6.3 1.7 1.7 0 0 1 5.2 4.5z"/></svg>Com telefone</span><span class="kpi-value" id="kpi-phone">–</span><span class="kpi-hint" id="kpi-phone-hint">&nbsp;</span></div>
+      <div class="kpi yellow"><span class="kpi-label"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/></svg>Com e-mail</span><span class="kpi-value" id="kpi-email">–</span><span class="kpi-hint" id="kpi-email-hint">só em buscas com e-mail ligado</span></div>
+    </section>
+
+    <div class="grid">
+      <!-- ═════════ Nova busca ═════════ -->
+      <section class="card" id="sec-new" aria-labelledby="new-title">
+        <div class="card-head">
+          <h2 id="new-title">Nova busca</h2>
+        </div>
+
+        <form id="search-form" autocomplete="off" novalidate>
+          <div class="step">
+            <span class="step-n">1</span>
+            <div class="step-body">
+              <label for="keyword" class="step-title">O que você procura?</label>
+              <input id="keyword" class="input" type="text" placeholder="ex.: dentista, ortodontista">
+              <p class="help">Como você digitaria no Google Maps. Várias buscas: separe por vírgula.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <span class="step-n">2</span>
+            <div class="step-body">
+              <label for="location" class="step-title">Onde?</label>
+              <input id="location" class="input" type="text" placeholder="ex.: Barra Funda, São Paulo">
+              <div id="geo-status" class="geo-status"></div>
+              <div id="geo-map" class="geo-map" hidden></div>
+              <div class="radius-box">
+                <div class="radius-line">
+                  <span class="adv-title">Raio</span>
+                  <span class="help" id="radius-hint">Digite o local para ver a área no mapa.</span>
+                  <output id="radius-val" class="value">5 km</output>
+                </div>
+                <input id="radius" class="range" type="range" min="1" max="20" step="1" value="5" aria-label="Raio em quilômetros">
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <span class="step-n">3</span>
+            <div class="step-body">
+              <div class="step-line">
+                <span class="step-title" id="amount-label">Quantidade</span>
+                <div class="seg" role="radiogroup" aria-labelledby="amount-label">
+                  <button type="button" role="radio" data-depth="1">20</button>
+                  <button type="button" role="radio" data-depth="5" class="on" aria-checked="true">60</button>
+                  <button type="button" role="radio" data-depth="10">120</button>
+                  <button type="button" role="radio" data-depth="20">200+</button>
+                </div>
+              </div>
+              <p class="help" id="amount-hint">Aproximado · leva ~4 min</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <span class="step-n">4</span>
+            <div class="step-body">
+              <div class="step-line">
+                <label for="lang" class="step-title">Idioma</label>
+                <select id="lang" class="input menu">
+                  <option value="pt" selected>Português</option>
+                  <option value="en">Inglês</option>
+                  <option value="es">Espanhol</option>
+                </select>
+              </div>
+              <p class="help">Das categorias: “Dentista” ou “Dentist”.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <span class="step-n">5</span>
+            <div class="step-body">
+              <label class="switch-row" for="email">
+                <span>
+                  <span class="step-title">Buscar e-mails</span>
+                  <span class="help">Visita o site de cada empresa. Fica ~2x mais lento.</span>
+                </span>
+                <input id="email" type="checkbox" role="switch">
+                <span class="switch" aria-hidden="true"></span>
+              </label>
+            </div>
+          </div>
+
+          <details class="advanced">
+            <summary>Limite de tempo <span>(opcional)</span></summary>
+            <div class="adv">
+              <label class="adv-field">
+                <span class="help">A busca para nesse tempo e entrega o que já achou. Em branco, calculamos pela quantidade.</span>
+                <input id="maxtime" class="input" type="number" min="2" max="120" placeholder="automático (minutos)">
+              </label>
+            </div>
+          </details>
+
+          <div id="form-error" class="alert" hidden></div>
+          <button id="submit" class="btn btn-primary" type="submit"><span class="btn-label">Iniciar busca</span></button>
+          <p class="fineprint">Uma busca por vez evita bloqueio temporário do Google. Telefones e e-mails são dados pessoais: use conforme a LGPD.</p>
+        </form>
+      </section>
+
+      <!-- ═════════ Buscas ═════════ -->
+      <section class="card" id="sec-jobs" aria-labelledby="jobs-title">
+        <div class="card-head row">
+          <div>
+            <h2 id="jobs-title">Suas buscas</h2>
+            <p>Clique numa busca para ver os resultados.</p>
+          </div>
+          <span id="queue-info" class="pill"></span>
+        </div>
+        <ul id="jobs" class="jobs"><li class="empty">Carregando…</li></ul>
+      </section>
+    </div>
+
+    <!-- ═════════ Resultados ═════════ -->
+    <section id="results" class="card results" hidden aria-labelledby="results-title">
+      <div class="card-head row">
+        <div>
+          <h2 id="results-title">Resultados</h2>
+          <p id="results-sub"></p>
+        </div>
+        <div class="head-actions">
+          <a id="open-in-map" class="btn" href="/" title="Abrir esta busca no modo Mapa">Ver no Mapa</a>
+          <button id="results-close" class="btn btn-ghost" type="button">Fechar</button>
+        </div>
+      </div>
+
+      <div class="mini-kpis" id="mini-kpis"></div>
+
+      <div class="filters">
+        <label class="filter">
+          <span class="filter-title">Procurar</span>
+          <input id="filter" class="input" type="search" placeholder="nome, rua, telefone…">
+        </label>
+        <label class="filter">
+          <span class="filter-title">Categoria</span>
+          <select id="cat-filter" class="input"><option value="">Todas</option></select>
+        </label>
+        <label class="filter">
+          <span class="filter-title">Ordenar por</span>
+          <select id="sort" class="input">
+            <option value="">Ordem do Google</option>
+            <option value="review_rating:-1">Melhor nota</option>
+            <option value="review_count:-1">Mais avaliações</option>
+            <option value="title:1">Nome (A–Z)</option>
+          </select>
+        </label>
+        <div class="filter checks">
+          <span class="filter-title">Mostrar só</span>
+          <label class="check" id="in-radius-wrap" title="Esconde empresas fora do raio escolhido na busca"><input id="in-radius" type="checkbox" checked> <span id="in-radius-label">dentro do raio</span></label>
+          <label class="check" title="Esconde empresas que aparecem mais de uma vez (mesmo telefone)"><input id="dedupe" type="checkbox" checked> sem repetidos</label>
+          <label class="check"><input id="only-phone" type="checkbox"> com telefone</label>
+          <label class="check"><input id="only-email" type="checkbox"> com e-mail</label>
+        </div>
+      </div>
+
+      <div class="export">
+        <span><b id="export-count"></b> <span class="help inline">· a exportação leva só as linhas filtradas</span></span>
+        <div class="export-buttons">
+          <button class="btn filled" data-export="excel" type="button" title="Arquivo .csv que abre direto no Excel em português (dois cliques)">Baixar para Excel</button>
+          <button class="btn" data-export="sheets" type="button" title="Arquivo .csv para o Google Sheets: Arquivo → Importar → Upload">Google Sheets</button>
+          <button class="btn" data-export="copy" type="button" title="Copia a tabela: é só colar (Ctrl+V) numa planilha">Copiar</button>
+          <a id="raw-download" class="btn btn-ghost" href="#" title="Arquivo original do scraper com todas as ~35 colunas">CSV completo</a>
+        </div>
+      </div>
+
+      <div class="results-body">
+        <div class="table-wrap">
+          <table id="results-table">
+            <thead><tr>
+              <th>Empresa</th><th>Contato</th><th class="num">Nota</th><th>Endereço</th><th></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="map-box">
+          <div id="map"></div>
+          <p class="help">Clique numa linha para ver a empresa no mapa.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="page-foot">
+      <div class="credits">
+        <p>Motor de coleta: <a href="https://github.com/gosom/google-maps-scraper" target="_blank" rel="noopener"><b>google-maps-scraper</b></a>, de <b>Georgios Komninos</b> (<a href="https://github.com/gosom" target="_blank" rel="noopener">@gosom</a>), licença MIT. Kit de instalação baseado em <a href="https://github.com/Mahanaicoach/google-maps-scraper-kit" target="_blank" rel="noopener">Mahanaicoach/google-maps-scraper-kit</a>.</p>
+      </div>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast" hidden role="status"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="/app/painel.js"></script>
+</body>
+</html>

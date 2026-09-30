@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Google Maps Scraper</title>
+  <link rel="icon" type="image/png" href="/app/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="/app/style.css">
+</head>
+<body>
+  <!-- Content layer: the map fills the window and extends beneath the floating sidebar. -->
+  <div id="map" aria-label="Mapa"></div>
+
+  <!-- Control layer: floating glass sidebar. -->
+  <aside class="sidebar glass" id="panel">
+    <header class="app-head">
+      <img class="brand-mark" src="/app/img/logo.png" alt="" width="36" height="36">
+      <div class="brand-text">
+        <div class="brand-name">Google Maps Scraper</div>
+        <div class="brand-sub">Listas de empresas</div>
+      </div>
+      <nav class="mode-switch" aria-label="Modo de visualização">
+        <a href="/" class="on" aria-current="page">Mapa</a>
+        <a href="/painel" id="to-painel" title="Ver em formato de painel">Painel</a>
+      </nav>
+    </header>
+
+    <div class="scroll">
+      <!-- ═════════ Busca + lista de buscas ═════════ -->
+      <div id="view-home" class="view">
+        <form id="search-form" autocomplete="off" novalidate>
+          <div class="group search-group">
+            <label class="search-row">
+              <svg class="row-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+              <input id="keyword" type="text" placeholder="O que você procura?" aria-label="O que você procura?" enterkeyhint="next">
+              <kbd class="kbd" title="Atalho: tecle / para buscar">/</kbd>
+            </label>
+            <label class="search-row">
+              <svg class="row-icon pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+              <input id="location" type="text" placeholder="Onde? Bairro, cidade…" aria-label="Onde?" enterkeyhint="search">
+            </label>
+          </div>
+          <p id="geo-status" class="footnote">Ex.: <em>dentista</em> em <em>Barra Funda, São Paulo</em>. Várias buscas? Separe por vírgula.</p>
+
+          <div class="group">
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Quantidade</span>
+                <span class="row-sub" id="amount-hint"></span>
+              </div>
+              <div class="segmented compact" role="radiogroup" aria-label="Quantidade de resultados">
+                <button type="button" class="chip" data-depth="1">20</button>
+                <button type="button" class="chip selected" data-depth="5">60</button>
+                <button type="button" class="chip" data-depth="10">120</button>
+                <button type="button" class="chip" data-depth="20">200+</button>
+              </div>
+            </div>
+            <div class="row stacked">
+              <div class="row-line">
+                <div class="row-text">
+                  <span class="row-title">Raio</span>
+                  <span class="row-sub" id="radius-hint">Área em volta do local, desenhada no mapa.</span>
+                </div>
+                <output id="radius-val" class="value">5 km</output>
+              </div>
+              <input id="radius" class="range" type="range" min="1" max="20" step="1" value="5" aria-label="Raio em quilômetros">
+            </div>
+            <label class="row">
+              <div class="row-text">
+                <span class="row-title">Idioma</span>
+                <span class="row-sub">Das categorias: “Dentista” ou “Dentist”</span>
+              </div>
+              <select id="lang" class="menu" aria-label="Idioma dos resultados">
+                <option value="pt" selected>Português</option>
+                <option value="en">Inglês</option>
+                <option value="es">Espanhol</option>
+              </select>
+            </label>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Buscar e-mails</span>
+                <span class="row-sub">Visita o site de cada empresa. Mais lento.</span>
+              </div>
+              <button type="button" id="email-chip" class="switch" role="switch" aria-pressed="false" aria-label="Buscar e-mails"><span></span></button>
+            </div>
+            <details class="row disclosure">
+              <summary>
+                <span class="row-title">Limite de tempo</span>
+                <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+              </summary>
+              <div class="adv-grid">
+                <label class="full">Parar depois de (minutos)<input id="maxtime" class="field" type="number" min="2" max="120" placeholder="automático"><small>A busca para nesse tempo e entrega o que já achou. Em branco, calculamos pela quantidade.</small></label>
+              </div>
+            </details>
+          </div>
+          <p class="note" id="email-note" hidden>E-mails não aparecem no Google Maps: o scraper entra no <b>site de cada empresa</b> e procura lá. A busca fica ~2x mais lenta e só acha e-mail de quem tem site.</p>
+
+          <div id="form-error" class="form-error" hidden></div>
+          <button id="submit" class="btn-primary" type="submit"><span class="btn-label">Pesquisar</span></button>
+        </form>
+
+        <div class="section-head">
+          <h2>Suas buscas</h2>
+          <span id="health" class="health"><i></i><span>verificando…</span></span>
+        </div>
+        <ul id="jobs" class="group jobs"><li class="empty">Carregando…</li></ul>
+        <p class="footnote">Toque numa busca concluída para ver as empresas no mapa.</p>
+
+        <footer class="credits-foot">
+          <div class="credits">
+            <div class="credits-title">Créditos</div>
+            <p>Motor de coleta: <a href="https://github.com/gosom/google-maps-scraper" target="_blank" rel="noopener"><b>google-maps-scraper</b></a>, de <b>Georgios Komninos</b> (<a href="https://github.com/gosom" target="_blank" rel="noopener">@gosom</a>), licença MIT. Kit de instalação baseado em <a href="https://github.com/Mahanaicoach/google-maps-scraper-kit" target="_blank" rel="noopener">Mahanaicoach/google-maps-scraper-kit</a>.</p>
+            <div class="credits-actions">
+              <a class="credit-btn" href="https://github.com/gosom/google-maps-scraper" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>Dar estrela</a>
+              <a class="credit-btn" href="https://github.com/sponsors/gosom" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 21.35-1.450-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Apoiar o autor</a>
+            </div>
+          </div>
+          <p class="legal">Uma busca por vez evita bloqueio temporário do Google. Contatos são dados pessoais: use conforme a LGPD. · <a href="/classic">interface antiga</a></p>
+        </footer>
+      </div>
+
+      <!-- ═════════ Resultados ═════════ -->
+      <div id="view-results" class="view" hidden>
+        <div class="results-top">
+          <button id="back" class="icon-btn" type="button" aria-label="Voltar" title="Voltar para as buscas">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+          <div class="results-titles">
+            <h1 id="results-title">Resultados</h1>
+            <p id="results-sub"></p>
+          </div>
+        </div>
+
+        <button id="open-dash" class="group dash-cta" type="button">
+          <span class="dash-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg></span>
+          <span class="row-text"><span class="row-title">Ver em painel</span><span class="row-sub">Números, categorias, tabela e exportação</span></span>
+          <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+        </button>
+
+        <label class="searchfield">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input id="filter" type="search" placeholder="Filtrar por nome, rua, telefone" aria-label="Filtrar resultados">
+        </label>
+
+        <div class="chip-row">
+          <select id="cat-filter" class="chip chip-select" aria-label="Categoria" title="Mostrar só uma categoria"><option value="">Todas as categorias</option></select>
+          <button type="button" class="chip selected" id="in-radius" aria-pressed="true" title="Esconde empresas fora do raio escolhido na busca" hidden>Dentro do raio</button>
+          <button type="button" class="chip selected" id="dedupe" aria-pressed="true" title="Esconde empresas repetidas (mesmo telefone)">Sem duplicados</button>
+          <button type="button" class="chip" id="only-phone" aria-pressed="false" title="Mostra só quem tem telefone">Com telefone</button>
+          <button type="button" class="chip" id="sort-rating" aria-pressed="false" title="Ordena pela nota no Google">Mais bem avaliados</button>
+        </div>
+
+        <div class="export-bar">
+          <span id="export-count"></span>
+          <div class="export-actions" role="group" aria-label="Exportar">
+            <button class="pill-btn" data-export="excel" type="button" title="Baixa um .csv que abre direto no Excel em português">Excel</button>
+            <button class="pill-btn" data-export="sheets" type="button" title="Baixa um .csv para importar no Google Sheets">Sheets</button>
+            <button class="pill-btn" data-export="copy" type="button" title="Copia a tabela para colar numa planilha">Copiar</button>
+          </div>
+        </div>
+
+        <ul id="places" class="group places"></ul>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═════════ Painel (sheet) ═════════ -->
+  <div id="dash" class="dash" hidden role="dialog" aria-modal="true" aria-labelledby="dash-title">
+    <div class="sheet">
+      <div class="grabber" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <div>
+          <h2 id="dash-title">Painel</h2>
+          <p id="dash-sub"></p>
+        </div>
+        <button id="dash-close" class="close-btn" type="button" aria-label="Fechar painel" title="Fechar (Esc)">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+
+      <div class="sheet-body">
+        <div class="kpis" id="dash-kpis"></div>
+
+        <div class="dash-grid">
+          <section class="card">
+            <h3>Categorias</h3>
+            <p class="footnote">Clique numa categoria para filtrar.</p>
+            <ul id="dash-cats" class="bars"></ul>
+          </section>
+          <section class="card">
+            <h3>Qualidade dos contatos</h3>
+            <p class="footnote">Quantas empresas têm cada tipo de contato.</p>
+            <ul id="dash-contacts" class="bars"></ul>
+          </section>
+        </div>
+
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h3>Empresas</h3>
+              <p class="footnote"><span id="dash-count"></span>. Clique no título de uma coluna para ordenar. A exportação leva só as linhas filtradas.</p>
+            </div>
+            <div class="export-actions">
+              <button class="pill-btn filled" data-export="excel" type="button" title="Arquivo .csv que abre direto no Excel em português">Baixar p/ Excel</button>
+              <button class="pill-btn" data-export="sheets" type="button" title="Arquivo .csv para o Google Sheets: Arquivo → Importar → Upload">Baixar p/ Sheets</button>
+              <button class="pill-btn" data-export="copy" type="button" title="Copia a tabela: é só colar (Ctrl+V) numa planilha">Copiar</button>
+              <a id="raw-download" class="pill-btn plain" href="#" title="Arquivo original do scraper com todas as ~35 colunas">CSV completo</a>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="results-table">
+              <thead><tr>
+                <th data-sort="title">Nome</th><th data-sort="category">Categoria</th><th>Telefone</th>
+                <th>E-mail</th><th>Site</th><th data-sort="review_rating" class="num">Nota</th>
+                <th data-sort="review_count" class="num">Avaliações</th><th data-sort="address">Endereço</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast glass" hidden role="status"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="/app/app.js"></script>
+</body>
+</html>

@@ -58,7 +58,7 @@ def collect_keywords(a):
         kws.append(a.keyword)
     kws.extend(a.also or [])
     if a.keywords_file:
-        with open(a.keywords_file) as f:
+        with open(a.keywords_file, encoding="utf-8") as f:
             kws.extend(line.strip() for line in f if line.strip() and not line.startswith("#"))
     # de-dupe, keep order
     seen, out = set(), []
@@ -131,6 +131,8 @@ def main():
     ap.add_argument("--keywords-file", help="file with one keyword per line (batch)")
     ap.add_argument("--city", help="city/place to auto-geocode for lat/lon")
     ap.add_argument("--depth", type=int, default=5)
+    ap.add_argument("--lang", default="en", help="2-letter result language code, e.g. pt (default: en)")
+    ap.add_argument("--radius", type=int, default=10000, help="search radius in METERS (default: 10000)")
     # Emails are ON by default (they're the most valuable lead field). Visits each business
     # website to find an address — a bit slower. Use --no-email to skip for a fast run.
     ap.add_argument("--email", dest="email", action="store_true", default=True, help=argparse.SUPPRESS)
@@ -178,8 +180,8 @@ def main():
     except Exception as e:
         sys.exit(f"✗ Scraper not reachable at {BASE} — run 'docker compose up -d' first.\n  ({e})")
 
-    body = {"name": "scrape-py", "keywords": keywords, "lang": "en", "zoom": 15,
-            "lat": str(lat), "lon": str(lon), "fast_mode": False, "radius": 10000,
+    body = {"name": "scrape-py", "keywords": keywords, "lang": a.lang, "zoom": 15,
+            "lat": str(lat), "lon": str(lon), "fast_mode": False, "radius": a.radius,
             "depth": a.depth, "email": a.email, "max_time": a.max_time}
     print(f"▶ Creating job: {len(keywords)} keyword(s) @ {lat},{lon} depth={a.depth} email={a.email}")
     for k in keywords:
@@ -231,10 +233,10 @@ def main():
     as_json = a.json or (a.out and a.out.lower().endswith(".json"))
     out = a.out or f"results-{job_id[:8]}.{'json' if as_json else 'csv'}"
     if as_json:
-        with open(out, "w") as f:
+        with open(out, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
     else:
-        with open(out, "w", newline="") as f:
+        with open(out, "w", newline="", encoding="utf-8-sig") as f:
             w = csv.DictWriter(f, fieldnames=fields)
             w.writeheader()
             w.writerows(results)

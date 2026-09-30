@@ -57,8 +57,11 @@ docker ps | grep gmaps-scraper          # should show it "Up"
 curl http://localhost:8080/api/v1/jobs  # should print [] (empty list) or existing jobs
 ```
 
-You can also open the built-in UI and API docs in a browser:
-- Web UI: **http://localhost:8080**
+You can also open the web UI and API docs in a browser:
+- Web UI: **http://localhost:8080**: the kit's own Maps-style front-end (`frontend/`). Type *what*
+  and *where* (the place is geocoded for you, no lat/lon), see results as pins on a map, filter,
+  and export for Excel/Google Sheets.
+- Original scraper UI: http://localhost:8080/classic
 - OpenAPI docs: **http://localhost:8080/api/docs**
 
 ✅ If `curl` returns a JSON array, the system is live.
@@ -173,6 +176,9 @@ curl -X DELETE http://localhost:8080/api/v1/jobs/<job-id>
 | Job stuck `working` forever | Lower `depth`, or the IP is being throttled by Google — wait, or add proxies (see skill). |
 | Empty CSV | Keyword too narrow or wrong geo — widen `radius` or fix `lat`/`lon`. |
 | Docker pull is slow | Normal on first run; it caches after that. |
+| Job fails with `could not install driver … 404` | Old image tag. Use `v1.18.1`+ (Playwright's old CDN is gone). |
+| Windows: `UnicodeEncodeError` in `scrape.py` | Update the script: output files are now written as UTF-8. |
+| "Docker Desktop is unable to start" | Quit Docker Desktop, run `wsl --shutdown`, reopen it. |
 
 ---
 

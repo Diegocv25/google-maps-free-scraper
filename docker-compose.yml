@@ -8,16 +8,33 @@ services:
     # Pinned to a known-good release for reproducibility (bump deliberately).
     # The published image is linux/amd64. On Apple Silicon (M1/M2/M3) it runs under
     # emulation; if it won't start, UNCOMMENT the 'platform' line below.
-    image: gosom/google-maps-scraper:v1.15.0
+    image: gosom/google-maps-scraper:v1.18.1
     # platform: linux/amd64
     container_name: gmaps-scraper
     restart: unless-stopped
     command: ["-web", "-data-folder", "/gmapsdata"]
-    ports:
-      - "127.0.0.1:8080:8080"   # localhost only — see warning above
+    # Not published directly — the 'web' proxy below serves it on localhost:8080.
+    expose:
+      - "8080"
     volumes:
       - gmaps_data:/gmapsdata    # job results persist here
       - gmaps_cache:/opt         # Playwright browser cache (faster restarts)
+
+  # nginx in front of the scraper: serves the new front-end (./frontend) at "/", keeps the
+  # original UI at "/classic" (patched — its htmx 1.9.6 dropped the job table rows), and
+  # proxies the API unchanged. Routing lives in nginx.conf.
+  web:
+    image: nginx:1.27-alpine
+    container_name: gmaps-web
+    restart: unless-stopped
+    depends_on:
+      - google-maps-scraper
+    ports:
+      - "127.0.0.1:8080:80"     # localhost only — see warning above
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./scraper-proxy.inc:/etc/nginx/conf.d/scraper-proxy.inc:ro
+      - ./frontend:/usr/share/nginx/html:ro
 
 volumes:
   gmaps_data:
