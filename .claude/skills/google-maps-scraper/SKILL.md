@@ -5,6 +5,10 @@ description: Scrape Google Maps business listings (name, address, phone, website
 
 # Google Maps Scraper
 
+## Neighborhood mode
+For a request naming a specific bairro, prefer `scripts/scrape_neighborhood.py` with `--radius 4000 --grid 5 --depth 5`. It runs five controlled centers, three query variants, deduplicates and exports only rows identified in the requested bairro; rejected rows are kept in `*-excluded.csv`.
+
+
 Drive the local Google Maps scraper API to turn a business-type + location into clean, structured rows.
 
 ## Mental model

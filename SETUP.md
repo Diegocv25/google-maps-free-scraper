@@ -58,9 +58,7 @@ curl http://localhost:8080/api/v1/jobs  # should print [] (empty list) or existi
 ```
 
 You can also open the web UI and API docs in a browser:
-- Web UI: **http://localhost:8080**: the kit's own Maps-style front-end (`frontend/`). Type *what*
-  and *where* (the place is geocoded for you, no lat/lon), see results as pins on a map, filter,
-  and export for Excel/Google Sheets.
+- **Web UI:** **http://localhost:8080**: painel local do kit. Informe categoria e localização; para foco por bairro, use `bairro, cidade, estado` (por exemplo, `Ponte do Imaruim, Palhoça, SC`). O modo focado executa consultas controladas, usa raio de até **4 km**, cobre cinco pontos (centro/norte/sul/leste/oeste), deduplica e exporta apenas resultados identificados no bairro.
 - Original scraper UI: http://localhost:8080/classic
 - OpenAPI docs: **http://localhost:8080/api/docs**
 
@@ -95,7 +93,12 @@ the full results to a file.
 
 **Don't want to look up coordinates?** Let it geocode the city for you:
 ```bash
-python3 scripts/scrape.py "cafes in Austin TX" --city "Austin, TX" --depth 5
+python3 scripts/scrape.py "restaurantes em Praia de Fora, Palhoça, SC" --city "Praia de Fora, Palhoça, SC" --radius 4000 --depth 5
+```
+
+Para uma busca focada com cobertura de bairro, use o executor especializado:
+```bash
+python3 scripts/scrape_neighborhood.py "Praia de Fora" --city "Palhoça" --state "SC" --radius 4000 --grid 5 --depth 5 --out results-praia-de-fora
 ```
 
 **Scrape many queries at once** (one job, many keywords) from a file:

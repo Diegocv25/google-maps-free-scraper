@@ -59,7 +59,12 @@ curl http://localhost:8080/api/v1/jobs
 #     "Scrape gyms in Miami and give me phones + websites."
 ```
 
-Full instructions: **[SETUP.md](SETUP.md)**. How Claude uses it: **[.claude/skills/google-maps-scraper/SKILL.md](.claude/skills/google-maps-scraper/SKILL.md)**.
+```bash
+# 3b. Busca focada por bairro (cinco pontos, raio de até 4 km)
+python3 scripts/scrape_neighborhood.py "Praia de Fora" --city "Palhoça" --state "SC" --radius 4000 --grid 5 --depth 5 --out results-praia-de-fora
+```
+
+
 
 ---
 
@@ -85,7 +90,16 @@ It intentionally **does not** trigger for social media (Instagram/TikTok) — th
 
 ---
 
-## ⚠️ Rate limits, bans & responsible use
+### Busca focada por bairro
+
+Use `scripts/scrape_neighborhood.py` quando o objetivo for exclusivamente um bairro. O comando faz cinco pontos controlados, usa raio máximo de 4 km, executa três variações de consulta, deduplica e grava no CSV principal somente resultados identificados no bairro. Resultados rejeitados ficam no arquivo `*-excluded.csv`.
+
+Exemplo:
+```bash
+python3 scripts/scrape_neighborhood.py "Ponte do Imaruim" --city "Palhoça" --state "SC" --radius 4000 --grid 5 --depth 5 --out results-ponte
+```
+
+---
 
 The upstream project's guidance (and ours): *"Please use this scraper responsibly and in accordance with
 applicable laws and regulations. Unauthorized scraping may violate terms of service."* There's **no
@@ -128,6 +142,7 @@ google-maps-scraper-kit/
 ├── CREDITS.md           ← attribution to the upstream author (gosom)
 ├── LICENSE              ← MIT (this kit)
 ├── docker-compose.yml   ← runs the scraper locally on :8080
+├── scripts/scrape_neighborhood.py ← focused neighborhood search (5 points, 3 queries, strict filter)
 ├── .env.example         ← config template
 ├── .gitignore
 ├── scripts/
