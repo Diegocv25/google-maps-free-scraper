@@ -30,7 +30,7 @@ services:
     depends_on:
       - google-maps-scraper
     ports:
-      - "127.0.0.1:8080:80"     # localhost only — see warning above
+      - "127.0.0.1:8080:80"     # localhost only — production replacement port
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./scraper-proxy.inc:/etc/nginx/conf.d/scraper-proxy.inc:ro
