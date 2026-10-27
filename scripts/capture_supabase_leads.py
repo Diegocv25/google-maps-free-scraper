@@ -1,63 +1,62 @@
 #!/usr/bin/env python3
-"""Capture one pending niche neighborhood with the focused scraper."""
-from __future__ import annotations
-import argparse,json,os,re,subprocess,sys
-from datetime import datetime,timezone
-from pathlib import Path
-from urllib.request import Request,urlopen
+import json, os, subprocess, sys
+from urllib.request import Request, urlopen
+from urllib.parse import urlencode
+from urllib.error import HTTPError, URLError
 
-ENV_FILE=Path('/home/ubuntu/supabases.env')
-SCRAPER=Path('/home/ubuntu/workspaces/google-maps-free-scraper/scripts/scrape_neighborhood.py')
-BASE=os.environ.get('SCRAPER_BASE_URL','http://localhost:18080')
-OUT=Path('/home/ubuntu/workspaces/google-maps-free-scraper/runtime-results')
-NICHES={
-'salao':('enviado_salao','enviado_em_salao','LEADS_NICHOS_MISTO',['salão']),
-'barbearia':('enviado_barbearia','enviado_em_barbearia','LEADS_NICHOS_MISTO',['barbearia']),
-'spa':('enviado_spa','enviado_em_spa','LEADS_NICHOS_MISTO',['spa']),
-'estetica':('enviado_estetica','enviado_em_estetica','LEADS_NICHOS_MISTO',['estética']),
-'oficina_mecanica':('enviado_oficina_mecanica','enviado_em_oficina_mecanica','LEADS_MINHA_OFICINA',['oficina mecânica']),
-'restaurante':('enviado_restaurante','enviado_em_restaurante','LEADS_CARDAPIOJA',['restaurante']),
-'lanchonete':('enviado_lanchonete','enviado_em_lanchonete','LEADS_CARDAPIOJA',['lanchonete']),
-'pizzaria':('enviado_pizzaria','enviado_em_pizzaria','LEADS_CARDAPIOJA',['pizzaria']),
-'hamburgueria':('enviado_hamburgueria','enviado_em_hamburgueria','LEADS_CARDAPIOJA',['hamburgueria']),
-}
-def env():
- d={}
- for line in ENV_FILE.read_text().splitlines():
-  if line.strip() and not line.lstrip().startswith('#') and '=' in line:
-   k,v=line.split('=',1); d[k.strip()]=v.strip().strip('"').strip("'")
- return d
-def call(method,url,key,body=None):
- headers={'apikey':key,'Authorization':'Bearer '+key,'Accept':'application/json'}; data=None
- if body is not None: headers['Content-Type']='application/json'; data=json.dumps(body,ensure_ascii=False).encode()
- with urlopen(Request(url,data=data,headers=headers,method=method),timeout=45) as response:
-  raw=response.read(); return json.loads(raw) if raw else None
+FIELDS=['result','niche','estado','cidade','bairro','raw','valid','discarded','inserted','verified','destination','coverage_updated','error']
+TABLES={'salao':'LEADS_NICHOS_MISTO','barbearia':'LEADS_NICHOS_MISTO','spa':'LEADS_NICHOS_MISTO','estetica':'LEADS_NICHOS_MISTO','oficina_mecanica':'LEADS_MINHA_OFICINA','restaurante':'LEADS_CARDAPIOJA','lanchonete':'LEADS_CARDAPIOJA','pizzaria':'LEADS_CARDAPIOJA','hamburgueria':'LEADS_CARDAPIOJA'}
+QUERIES={'salao':['salão'],'barbearia':['barbearia'],'spa':['spa'],'estetica':['estética'],'oficina_mecanica':['oficina mecânica'],'restaurante':['restaurante'],'lanchonete':['lanchonete'],'pizzaria':['pizzaria'],'hamburgueria':['hamburgueria']}
+
+def report(**values):
+    out={k:values.get(k) for k in FIELDS}
+    print(json.dumps(out,ensure_ascii=False,separators=(',',':')))
+
+def call(method,url,key,payload=None):
+    data=json.dumps(payload,ensure_ascii=False).encode() if payload is not None else None
+    headers={'apikey':key,'Authorization':f'Bearer {key}','Content-Type':'application/json','Prefer':'return=representation'}
+    try:
+        with urlopen(Request(url,data=data,headers=headers,method=method),timeout=45) as response:
+            raw=response.read()
+            return json.loads(raw or b'null')
+    except HTTPError as exc:
+        body=exc.read().decode('utf-8','replace').strip()
+        raise RuntimeError(f'Supabase HTTP {exc.code}: {body or exc.reason}') from exc
+    except (URLError, TimeoutError) as exc:
+        raise RuntimeError(f'Supabase transport error: {exc}') from exc
+
 def main():
- p=argparse.ArgumentParser(); p.add_argument('niche',choices=NICHES); p.add_argument('--dry-run',action='store_true'); a=p.parse_args()
- cfg=env(); base=cfg['SUPABASE_FUNIL_URL'].rstrip('/')+'/rest/v1'; key=cfg['SUPABASE_FUNIL_SERVICE_ROLE_KEY']; flag,stamp,table,queries=NICHES[a.niche]
- rows=call('GET',f'{base}/cidades_bairros_geo?select=*&{flag}=eq.false&order=id.asc&limit=1',key)
- if not rows: print(json.dumps({'result':'no_pending','niche':a.niche})); return 0
- geo=rows[0]; out=OUT/f"{a.niche}-{geo['id']}"; out.mkdir(parents=True,exist_ok=True)
- cmd=[sys.executable,str(SCRAPER),geo['bairro'],'--city',geo['cidade'],'--state',geo['estado'],'--radius','4000','--grid','5','--depth','3','--max-time','360','--out',str(out)]
- proc=subprocess.run(cmd,text=True,capture_output=True,timeout=3600,env={**os.environ,'SCRAPER_BASE_URL':BASE})
- summary=out/f"{re.sub(r'[^a-z0-9]+','-',geo['bairro'].lower()).strip('-')}-summary.json"
- if proc.returncode: raise RuntimeError((proc.stderr or proc.stdout)[-2000:])
- report=json.loads(summary.read_text())
- now=datetime.now(timezone.utc).isoformat(); csv_path=Path(report['file'])
- with csv_path.open(encoding='utf-8-sig',newline='') as fh:
-  import csv
-  leads=list(csv.DictReader(fh))
- inserted=0; verified=0
- if not a.dry_run:
-  for lead in leads:
-   name=(lead.get('title') or '').strip(); phone=(lead.get('phone') or '').strip(); address=(lead.get('address') or '').strip(); website=(lead.get('website') or '').strip()
-   if not name: continue
-   payload={'Nome':name,'Telefone':phone,'Endereço':address,'Website':website,'Estado':geo['estado'],'Status':'Aguardando','nicho':a.niche,'source':'google_maps_free_scraper','extracted_at':now,'created_at':now,'updated_at':now,'bairro':geo['bairro'],'cidade':geo['cidade']}
-   identity=f'Nome=eq.{name}&Estado=eq.{geo["estado"]}'
-   if not call('GET',f'{base}/{table}?select=id&limit=1&{identity}',key):
-    call('POST',f'{base}/{table}',key,payload); inserted+=1
-   if call('GET',f'{base}/{table}?select=id&limit=1&{identity}',key): verified+=1
-  if len(leads)==0 or verified>=inserted:
-   call('PATCH',f'{base}/cidades_bairros_geo?id=eq.{geo["id"]}',key,{flag:True,stamp:now})
- print(json.dumps({'result':'dry_run' if a.dry_run else 'success','niche':a.niche,'estado':geo['estado'],'cidade':geo['cidade'],'bairro':geo['bairro'],'raw':report['unique_raw'],'valid':report['confirmed'],'discarded':report['excluded'],'inserted':inserted,'verified':verified,'destination':table,'coverage_updated':not a.dry_run},ensure_ascii=False))
-if __name__=='__main__': main()
+    niche=sys.argv[1].strip().lower() if len(sys.argv)>1 else ''
+    table=TABLES.get(niche)
+    if not table: raise RuntimeError(f'nicho inválido: {niche}')
+    base=os.environ.get('SUPABASE_URL','').rstrip('/')
+    key=os.environ.get('SUPABASE_KEY') or os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
+    scraper=os.environ.get('SCRAPER_BASE_URL','http://localhost:18080').rstrip('/')
+    if not base or not key: raise RuntimeError('credenciais Supabase ausentes')
+    queue=call('GET',f'{base}/rest/v1/cidades_bairros_geo?select=*&cobertura=eq.false&limit=1',key)
+    if not queue:
+        report(result='success',niche=niche,estado=None,cidade=None,bairro=None,raw=0,valid=0,discarded=0,inserted=0,verified=True,destination=table,coverage_updated=False,error=None)
+        return
+    row=queue[0]; state=row.get('estado') or row.get('Estado'); city=row.get('cidade') or row.get('Cidade'); neighborhood=row.get('bairro') or row.get('Bairro')
+    cmd=['python3','scripts/scrape_neighborhood.py',neighborhood,'--city',city,'--state',state,'--radius','4000','--grid','5','--depth','3','--out',f'/tmp/capture-{niche}']
+    proc=subprocess.run(cmd,capture_output=True,text=True,timeout=360)
+    if proc.returncode: raise RuntimeError((proc.stderr or proc.stdout).strip()[-2000:])
+    summary=json.loads(open(f'/tmp/capture-{niche}-summary.json').read())
+    leads=json.load(open(f'/tmp/capture-{niche}.json')) if os.path.exists(f'/tmp/capture-{niche}.json') else []
+    inserted=0
+    for lead in leads:
+        payload=dict(lead); payload.setdefault('Estado',state); payload.setdefault('Cidade',city); payload.setdefault('Bairro',neighborhood)
+        identity=urlencode({'Nome':f"eq.{payload.get('Nome','')}",'Estado':f'eq.{state}'})
+        existing=call('GET',f'{base}/rest/v1/{table}?{urlencode({"select":"id","limit":"1"})}&{identity}',key)
+        if not existing:
+            call('POST',f'{base}/rest/v1/{table}',key,payload); inserted+=1
+    verify_query=urlencode({'select':'id','limit':'1','Estado':f'eq.{state}','Cidade':f'eq.{city}','Bairro':f'eq.{neighborhood}'})
+    verify=call('GET',f'{base}/rest/v1/{table}?{verify_query}',key)
+    if not verify: raise RuntimeError('persistência não confirmada')
+    report(result='success',niche=niche,estado=state,cidade=city,bairro=neighborhood,raw=summary.get('raw',len(leads)),valid=summary.get('valid',len(leads)),discarded=summary.get('discarded',0),inserted=inserted,verified=True,destination=table,coverage_updated=False,error=None)
+
+if __name__=='__main__':
+    try: main()
+    except Exception as exc:
+        report(result='technical_failure',niche=sys.argv[1] if len(sys.argv)>1 else None,raw=None,valid=None,discarded=None,inserted=0,verified=False,destination=TABLES.get(sys.argv[1]) if len(sys.argv)>1 else None,coverage_updated=False,error=str(exc))
+        raise
