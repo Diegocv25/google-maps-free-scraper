@@ -844,6 +844,54 @@
       "source_location": "L91"
     },
     {
+      "id": "scripts_capture_supabase_leads_call",
+      "label": "call()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "capture_supabase_leads.py",
+      "file_type": "code",
+      "norm_label": "call()",
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L49"
+    },
+    {
+      "id": "scripts_capture_supabase_leads_load_env",
+      "label": "load_env()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "capture_supabase_leads.py",
+      "file_type": "code",
+      "norm_label": "load_env()",
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L39"
+    },
+    {
+      "id": "scripts_capture_supabase_leads_main",
+      "label": "main()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "capture_supabase_leads.py",
+      "file_type": "code",
+      "norm_label": "main()",
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L66"
+    },
+    {
+      "id": "scripts_capture_supabase_leads_report",
+      "label": "report()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "capture_supabase_leads.py",
+      "file_type": "code",
+      "norm_label": "report()",
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L35"
+    },
+    {
       "id": "scripts_scrape_collect_keywords",
       "label": "collect_keywords()",
       "_callable": true,
@@ -961,7 +1009,7 @@
       "file_type": "code",
       "norm_label": "job()",
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L30"
+      "source_location": "L37"
     },
     {
       "id": "scripts_scrape_neighborhood_main",
@@ -973,7 +1021,7 @@
       "file_type": "code",
       "norm_label": "main()",
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L44"
+      "source_location": "L51"
     },
     {
       "id": "scripts_scrape_neighborhood_norm",
@@ -997,7 +1045,7 @@
       "file_type": "code",
       "norm_label": "row_key()",
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L40"
+      "source_location": "L47"
     },
     {
       "id": "frontend_app",
@@ -1099,6 +1147,77 @@
       "file_type": "code",
       "norm_label": "scraper-proxy.inc",
       "source_file": "scraper-proxy.inc",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_capture_neighborhood",
+      "label": "capture_neighborhood.sh",
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "capture_neighborhood.sh",
+      "file_type": "code",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "norm_label": "capture_neighborhood.sh",
+      "source_file": "scripts/capture_neighborhood.sh",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_capture_neighborhood_sh__entry",
+      "label": "capture_neighborhood.sh script",
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "capture_neighborhood.sh",
+      "file_type": "code",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "norm_label": "capture_neighborhood.sh script",
+      "source_file": "scripts/capture_neighborhood.sh",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_capture_supabase_leads",
+      "label": "capture_supabase_leads.py",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "capture_supabase_leads.py",
+      "file_type": "code",
+      "norm_label": "capture_supabase_leads.py",
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_capture_niche",
+      "label": "capture_niche.sh",
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "capture_niche.sh",
+      "file_type": "code",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "norm_label": "capture_niche.sh",
+      "source_file": "scripts/capture_niche.sh",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_capture_niche_sh__entry",
+      "label": "capture_niche.sh script",
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "capture_niche.sh",
+      "file_type": "code",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "norm_label": "capture_niche.sh script",
+      "source_file": "scripts/capture_niche.sh",
       "source_location": "L1"
     },
     {
@@ -2914,6 +3033,42 @@
       "weight": 1.0
     },
     {
+      "source": "scripts_capture_supabase_leads_main",
+      "target": "scripts_capture_supabase_leads_load_env",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L68",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_capture_supabase_leads_main",
+      "target": "scripts_capture_supabase_leads_call",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_capture_supabase_leads_main",
+      "target": "scripts_capture_supabase_leads_report",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
       "source": "scripts_scrape_main",
       "target": "scripts_scrape_collect_keywords",
       "relation": "calls",
@@ -2982,7 +3137,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L32",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -2994,7 +3149,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L46",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -3006,7 +3161,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L52",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -3018,7 +3173,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L53",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -3030,7 +3185,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L54",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -3042,7 +3197,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L42",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -4322,6 +4477,72 @@
       "weight": 1.0
     },
     {
+      "source": "scripts_capture_neighborhood",
+      "target": "scripts_capture_neighborhood_sh__entry",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/capture_neighborhood.sh",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_capture_niche",
+      "target": "scripts_capture_niche_sh__entry",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/capture_niche.sh",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_capture_supabase_leads",
+      "target": "scripts_capture_supabase_leads_report",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_capture_supabase_leads",
+      "target": "scripts_capture_supabase_leads_load_env",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_capture_supabase_leads",
+      "target": "scripts_capture_supabase_leads_call",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_capture_supabase_leads",
+      "target": "scripts_capture_supabase_leads_main",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/capture_supabase_leads.py",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
       "source": "scripts_scrape_neighborhood",
       "target": "scripts_scrape_neighborhood_norm",
       "relation": "contains",
@@ -4362,7 +4583,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L30",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -4373,7 +4594,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L40",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -4384,7 +4605,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/scrape_neighborhood.py",
-      "source_location": "L44",
+      "source_location": "L51",
       "weight": 1.0
     },
     {
@@ -4653,5 +4874,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "085faf49d9804a4dfc944fa19e70890d30e636a9"
+  "built_at_commit": "b943c3630415307ce6e9cb7aaac84c515ef46b5f"
 }

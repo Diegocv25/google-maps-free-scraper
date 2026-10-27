@@ -25,7 +25,14 @@ def geocode(place):
   if a.get('city') or a.get('town') or a.get('municipality'): s+=2
   if a.get('state'): s+=1
   return s
- if not hits: raise RuntimeError('geocoding returned no candidates')
+ if not hits:
+  parts=[part.strip() for part in place.split(',')]
+  fallback=', '.join(parts[1:]) if len(parts)>1 else ''
+  if fallback:
+   q2=urllib.parse.urlencode({'format':'json','limit':5,'addressdetails':1,'countrycodes':'br','accept-language':'pt-BR','q':fallback})
+   r2=urllib.request.Request('https://nominatim.openstreetmap.org/search?'+q2,headers={'User-Agent':UA})
+   with urllib.request.urlopen(r2,timeout=30) as x: hits=json.loads(x.read())
+  if not hits: raise RuntimeError('geocoding returned no candidates')
  return max(hits,key=score),hits
 def job(query,lat,lon,a):
  body={'name':'focused-neighborhood','keywords':[query],'lang':'pt','zoom':15,'lat':str(lat),'lon':str(lon),'fast_mode':False,'radius':a.radius,'depth':a.depth,'email':False,'max_time':a.max_time}

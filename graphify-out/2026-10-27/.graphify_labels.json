@@ -12,5 +12,8 @@
   "10": "scrape-batch.md",
   "11": "scrape-jobs.md",
   "12": "scrape-setup.md",
-  "13": "scraper-proxy.inc"
+  "13": "scraper-proxy.inc",
+  "14": "capture_neighborhood.sh",
+  "15": "capture_supabase_leads.py",
+  "16": "capture_niche.sh"
 }

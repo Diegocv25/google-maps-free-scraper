@@ -1,16 +1,16 @@
 # Graph Report - google-maps-free-scraper  (2026-10-27)
 
 ## Corpus Check
-- 19 files · ~22,254 words
+- 18 files · ~22,263 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 161 nodes · 240 edges · 15 communities (13 shown, 2 thin omitted)
+- 159 nodes · 239 edges · 14 communities (13 shown, 1 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `085faf49`
+- Built from commit: `692b9c38`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -24,7 +24,6 @@
 - Contexto operacional do Google Maps Free Scraper
 - scrape_neighborhood.py
 - scrape.sh script
-- capture_neighborhood.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `Google Maps Scraper` - 12 edges
@@ -44,7 +43,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (15 total, 2 thin omitted)
+## Communities (14 total, 1 thin omitted)
 
 ### Community 0 - "app.js"
 Cohesion: 0.11
@@ -79,17 +78,17 @@ Cohesion: 0.62
 Nodes (6): api(), geocode(), job(), main(), norm(), row_key()
 
 ## Knowledge Gaps
-- **50 isolated node(s):** `RFC-4180`, `RFC-4180`, `capture_neighborhood.sh script`, `scrape.sh script`, `Neighborhood mode` (+45 more)
+- **49 isolated node(s):** `RFC-4180`, `RFC-4180`, `scrape.sh script`, `Neighborhood mode`, `Mental model` (+44 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Google Maps Scraper` connect `Google Maps Scraper` to `SETUP — Google Maps Scraper Kit`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **What connects `RFC-4180`, `RFC-4180`, `capture_neighborhood.sh script` to the rest of the system?**
-  _50 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **What connects `RFC-4180`, `RFC-4180`, `scrape.sh script` to the rest of the system?**
+  _49 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `app.js` be split into smaller, more focused modules?**
   _Cohesion score 0.10931174089068826 - nodes in this community are weakly interconnected._
 - **Should `painel.js` be split into smaller, more focused modules?**

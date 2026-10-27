@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "scripts/scrape_neighborhood.py": {
-    "mtime": 1793068609.7639596,
-    "seen": 1793068632.295437,
-    "ast_hash": "979f876028490bd8d274ccb83ea07bec",
+    "mtime": 1793073358.3538108,
+    "seen": 1793102501.5791802,
+    "ast_hash": "1987147cda3235ddd592932dd62ac47e",
     "semantic_hash": ""
   },
   ".claude/commands/scrape-batch.md": {
@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "docker-compose.yml": {
-    "mtime": 1793067671.6473365,
-    "seen": 1793067685.3998039,
-    "ast_hash": "8e787b93b8da501b284e4d39e97b3cd8",
+    "mtime": 1793071212.0305266,
+    "seen": 1793071213.1800337,
+    "ast_hash": "e75d3bfb66d6b8070d8c68957b29dba8",
     "semantic_hash": ""
   },
   "examples/queries.example.txt": {
@@ -147,12 +147,6 @@
     "mtime": 1793067671.6482701,
     "seen": 1793067685.3998117,
     "ast_hash": "5b4fe67de93db04a0f0449f3a9fd1555",
-    "semantic_hash": ""
-  },
-  "scripts/capture_neighborhood.sh": {
-    "mtime": 1793068618.354794,
-    "seen": 1793068632.2954323,
-    "ast_hash": "147a34bddb94559906dd8e5a131be973",
     "semantic_hash": ""
   }
 }
