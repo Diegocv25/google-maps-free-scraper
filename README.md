@@ -132,19 +132,25 @@ For reference, upstream measures ~120 places/min at `-c 8 -depth 1`.
 
 ---
 
-## What's inside
+## Hermes workflow
+
+`AGENTS.md` is the operational guide for Hermes. Before code questions, use Graphify when `graphify-out/` exists; after code changes run `graphify update .`. Use the neighborhood script for bairro/cidade/estado requests. Keep production on port 8080 isolated from laboratory tests.
+
+
 
 ```
 google-maps-scraper-kit/
-├── README.md            ← you are here
-├── SETUP.md             ← detailed, copy-paste setup (start here)
-├── CLAUDE.md            ← auto-loaded instructions for Claude Code
-├── CREDITS.md           ← attribution to the upstream author (gosom)
-├── LICENSE              ← MIT (this kit)
-├── docker-compose.yml   ← runs the scraper locally on :8080
-├── scripts/scrape_neighborhood.py ← focused neighborhood search (5 points, 3 queries, strict filter)
-├── .env.example         ← config template
+├── README.md            ← visão geral e uso rápido
+├── SETUP.md             ← instalação detalhada
+├── AGENTS.md            ← regras do Hermes e operação segura
+├── CLAUDE.md            ← instruções do Claude Code
+├── CREDITS.md           ← atribuição ao motor gosom
+├── LICENSE              ← MIT
+├── docker-compose.yml   ← scraper local em :8080
+├── scripts/scrape_neighborhood.py ← busca focada por bairro
+├── .env.example         ← configuração
 ├── .gitignore
+├── graphify-out/        ← mapa estrutural Graphify, quando versionado
 ├── scripts/
 │   ├── scrape.sh        ← one-shot bash scraper (single keyword)
 │   └── scrape.py        ← Python scraper: single, batch, + auto-geocoding (stdlib only)
