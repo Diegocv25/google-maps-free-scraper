@@ -8,7 +8,7 @@ from urllib.request import Request,urlopen
 
 ENV_FILE=Path('/home/ubuntu/supabases.env')
 SCRAPER=Path('/home/ubuntu/workspaces/google-maps-free-scraper/scripts/scrape_neighborhood.py')
-BASE=os.environ.get('SCRAPER_BASE_URL','http://localhost:8080')
+BASE=os.environ.get('SCRAPER_BASE_URL','http://localhost:18080')
 OUT=Path('/home/ubuntu/workspaces/google-maps-free-scraper/runtime-results')
 NICHES={
 'salao':('enviado_salao','enviado_em_salao','LEADS_NICHOS_MISTO',['salão']),

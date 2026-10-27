@@ -5,7 +5,7 @@ and exports only rows whose returned address/title names the requested neighborh
 """
 import argparse,csv,io,json,os,re,time,urllib.parse,urllib.request,unicodedata
 from pathlib import Path
-BASE=os.environ.get('SCRAPER_BASE_URL','http://localhost:8080').rstrip('/')
+BASE=os.environ.get('SCRAPER_BASE_URL','http://localhost:18080').rstrip('/')
 UA='google-maps-free-scraper-neighborhood/1.0'
 def norm(s): return re.sub(r'[^a-z0-9]+',' ',unicodedata.normalize('NFKD',str(s or '')).encode('ascii','ignore').decode().lower()).strip()
 def api(method,path,body=None):

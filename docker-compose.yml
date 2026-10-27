@@ -1,5 +1,5 @@
 # Runs the open-source Google Maps scraper (gosom/google-maps-scraper) locally.
-# Web/API mode on http://localhost:8080. The image has NO built-in auth, so we bind
+# Web/API mode on http://localhost:18080. The image has NO built-in auth, so we bind
 # to 127.0.0.1 ONLY — that localhost binding is the security boundary. Do not change
 # the port mapping to 0.0.0.0 / a public interface without putting an auth proxy in front.
 
@@ -30,7 +30,7 @@ services:
     depends_on:
       - google-maps-scraper
     ports:
-      - "127.0.0.1:8080:80"     # localhost only — production replacement port
+      - "127.0.0.1:18080:80"     # localhost only — production replacement port
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./scraper-proxy.inc:/etc/nginx/conf.d/scraper-proxy.inc:ro
