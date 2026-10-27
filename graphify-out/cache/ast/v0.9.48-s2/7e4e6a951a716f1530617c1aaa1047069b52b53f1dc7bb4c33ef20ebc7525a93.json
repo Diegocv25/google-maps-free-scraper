@@ -1,0 +1,1 @@
+{"nodes": [{"id": "$graphify-root$_claude_commands_scrape_setup_md", "label": "scrape-setup.md", "file_type": "document", "node_kind": "page", "source_file": ".claude/commands/scrape-setup.md", "source_location": "L1", "frontmatter": {"description": "Set up and start the local Google Maps scraper (Docker)"}}], "edges": [], "input_tokens": 0, "output_tokens": 0}
