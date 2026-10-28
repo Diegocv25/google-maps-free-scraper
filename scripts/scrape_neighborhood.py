@@ -34,8 +34,8 @@ def geocode(place):
    with urllib.request.urlopen(r2,timeout=30) as x: hits=json.loads(x.read())
   if not hits: raise RuntimeError('geocoding returned no candidates')
  return max(hits,key=score),hits
-def job(query,lat,lon,a):
- body={'name':'focused-neighborhood','keywords':[query],'lang':'pt','zoom':15,'lat':str(lat),'lon':str(lon),'fast_mode':False,'radius':a.radius,'depth':a.depth,'email':False,'max_time':a.max_time}
+def job(queries,lat,lon,a):
+ body={'name':'focused-neighborhood','keywords':queries,'lang':'pt','zoom':15,'lat':str(lat),'lon':str(lon),'fast_mode':False,'radius':a.radius,'depth':a.depth,'email':False,'max_time':a.max_time}
  created=json.loads(api('POST','/api/v1/jobs',body)); jid=created.get('id') or created.get('ID')
  if not jid: raise RuntimeError('job id missing')
  for _ in range(a.max_time//5+12):
@@ -49,17 +49,14 @@ def row_key(r):
   if r.get(k): return k+':'+norm(r[k])
  return 'nameaddr:'+norm(r.get('title','')+' '+r.get('address',''))
 def main():
- p=argparse.ArgumentParser(); p.add_argument('neighborhood'); p.add_argument('--city',default='Palhoça'); p.add_argument('--state',default='SC'); p.add_argument('--out',required=True); p.add_argument('--radius',type=int,default=4000); p.add_argument('--depth',type=int,default=3,help='scraper depth per job; 3 is the bounded default for 15 focused jobs'); p.add_argument('--max-time',type=int,default=240); p.add_argument('--grid',type=int,default=5); p.add_argument('--min-confirmed',type=int,default=0,help='stop after this many confirmed rows; 0 runs all requested cells'); a=p.parse_args()
+ p=argparse.ArgumentParser(); p.add_argument('neighborhood'); p.add_argument('--query',default='restaurante'); p.add_argument('--city',default='Palhoça'); p.add_argument('--state',default='SC'); p.add_argument('--out',required=True); p.add_argument('--radius',type=int,default=4000); p.add_argument('--depth',type=int,default=3,help='scraper depth per job; 3 is the bounded default for 15 focused jobs'); p.add_argument('--max-time',type=int,default=240); p.add_argument('--grid',type=int,default=5); p.add_argument('--min-confirmed',type=int,default=0,help='stop after this many confirmed rows; 0 runs all requested cells'); a=p.parse_args()
  chosen,candidates=geocode(f'{a.neighborhood}, {a.city}, {a.state}, Brasil'); lat,lon=float(chosen['lat']),float(chosen['lon']); d=0.012
  centers=[(lat,lon,'center'),(lat+d,lon,'north'),(lat-d,lon,'south'),(lat,lon+d,'east'),(lat,lon-d,'west')][:max(1,min(5,a.grid))]
- queries=[f'restaurantes em {a.neighborhood}, {a.city}, {a.state}',f'restaurante {a.neighborhood}, {a.city}, {a.state}',f'restaurants {a.neighborhood}, {a.city}, {a.state}']
+ queries=[f'{a.query} em {a.neighborhood}, {a.city}, {a.state}',f'{a.query} {a.neighborhood}, {a.city}, {a.state}',f'{a.query}s {a.neighborhood}, {a.city}, {a.state}']
  allrows={}; jobs=[]
  for clat,clon,cell in centers:
-  for q in queries:
-   rows,body,jid=job(q,clat,clon,a); jobs.append({'id':jid,'cell':cell,'query':q,'count':len(rows),'payload':body})
-   for r in rows: allrows.setdefault(row_key(r),r)
-   if a.min_confirmed and sum(1 for r in allrows.values() if norm(a.neighborhood) in norm(r.get('address','')+' '+r.get('title',''))) >= a.min_confirmed:
-    break
+  rows,body,jid=job(queries,clat,clon,a); jobs.append({'id':jid,'cell':cell,'query':queries,'count':len(rows),'payload':body})
+  for r in rows: allrows.setdefault(row_key(r),r)
   if a.min_confirmed and sum(1 for r in allrows.values() if norm(a.neighborhood) in norm(r.get('address','')+' '+r.get('title',''))) >= a.min_confirmed:
    break
  confirmed=[r for r in allrows.values() if norm(a.neighborhood) in norm(r.get('address','')+' '+r.get('title',''))]; excluded=[r for r in allrows.values() if r not in confirmed]
