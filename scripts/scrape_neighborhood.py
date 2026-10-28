@@ -38,12 +38,14 @@ def job(queries,lat,lon,a):
  body={'name':'focused-neighborhood','keywords':queries,'lang':'pt','zoom':15,'lat':str(lat),'lon':str(lon),'fast_mode':False,'radius':a.radius,'depth':a.depth,'email':False,'max_time':a.max_time}
  created=json.loads(api('POST','/api/v1/jobs',body)); jid=created.get('id') or created.get('ID')
  if not jid: raise RuntimeError('job id missing')
- for _ in range(a.max_time//5+12):
+ deadline=time.time()+a.max_time
+ while time.time()<deadline:
   info=json.loads(api('GET','/api/v1/jobs/'+jid)); status=info.get('Status') or info.get('status')
   if status=='ok': return list(csv.DictReader(io.StringIO(api('GET','/api/v1/jobs/'+jid+'/download').decode('utf-8','replace')))),body,jid
   if status=='failed': raise RuntimeError('job failed '+jid)
   time.sleep(5)
- raise RuntimeError('job timeout '+jid)
+ info=json.loads(api('GET','/api/v1/jobs/'+jid))
+ raise RuntimeError(f'job timeout {jid} (status={info.get("Status") or info.get("status")})')
 def row_key(r):
  for k in ('place_id','placeid','phone'):
   if r.get(k): return k+':'+norm(r[k])
