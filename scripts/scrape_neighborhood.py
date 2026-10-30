@@ -3,7 +3,7 @@
 Runs one neighborhood at a time, uses five controlled centers, three query variants,
 and exports only rows whose returned address/title names the requested neighborhood.
 """
-import argparse,csv,io,json,os,re,time,urllib.parse,urllib.request,unicodedata
+import argparse,csv,io,json,os,re,subprocess,time,urllib.parse,urllib.request,unicodedata
 from pathlib import Path
 BASE=os.environ.get('SCRAPER_BASE_URL','http://localhost:18080').rstrip('/')
 UA='google-maps-free-scraper-neighborhood/1.0'
@@ -34,15 +34,31 @@ def geocode(place):
    with urllib.request.urlopen(r2,timeout=30) as x: hits=json.loads(x.read())
   if not hits: raise RuntimeError('geocoding returned no candidates')
  return max(hits,key=score),hits
+def restart_worker_if_idle():
+ # The API can remain healthy after its internal scrapemate worker exits.
+ # Restart only when no other job is actively working, so recovery does not
+ # interrupt a different neighborhood capture.
+ jobs=json.loads(api('GET','/api/v1/jobs'))
+ active=[x for x in jobs if (x.get('Status') or x.get('status')) == 'working']
+ if active: return False
+ p=subprocess.run(['sudo','-n','docker','restart','gmaps-scraper'],capture_output=True,text=True,timeout=60)
+ if p.returncode: raise RuntimeError(f'worker restart failed: {(p.stderr or p.stdout).strip()}')
+ return True
+
 def job(queries,lat,lon,a):
  body={'name':'focused-neighborhood','keywords':queries,'lang':'pt','zoom':15,'lat':str(lat),'lon':str(lon),'fast_mode':False,'radius':a.radius,'depth':a.depth,'email':False,'max_time':a.max_time}
  created=json.loads(api('POST','/api/v1/jobs',body)); jid=created.get('id') or created.get('ID')
  if not jid: raise RuntimeError('job id missing')
- deadline=time.time()+a.max_time
+ deadline=time.time()+a.max_time; pending_since=None; recovered=False
  while time.time()<deadline:
   info=json.loads(api('GET','/api/v1/jobs/'+jid)); status=info.get('Status') or info.get('status')
   if status=='ok': return list(csv.DictReader(io.StringIO(api('GET','/api/v1/jobs/'+jid+'/download').decode('utf-8','replace')))),body,jid
   if status=='failed': raise RuntimeError('job failed '+jid)
+  if status=='pending':
+   pending_since=pending_since or time.time()
+   if not recovered and time.time()-pending_since >= 45:
+    recovered=restart_worker_if_idle(); pending_since=time.time() if recovered else pending_since
+  else: pending_since=None
   time.sleep(5)
  info=json.loads(api('GET','/api/v1/jobs/'+jid))
  raise RuntimeError(f'job timeout {jid} (status={info.get("Status") or info.get("status")})')
